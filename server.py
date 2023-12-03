@@ -14,7 +14,6 @@ connection_details = {
 
 @app.route('/dummy', methods=['POST'])
 def dummy():
-    valList = []
     try:
         query1 = """
         PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -37,9 +36,9 @@ def dummy():
             for result in results['results']['bindings']:
                 for k, v in result.items():
                     if k in valueDict.keys():
-                        valueList = valueDict[k]
-                        if v['value'].split('#', 1)[1] not in valueList:
-                            valueList.append(v['value'].split('#', 1)[1])
+                        valList = valueDict[k]
+                        if v['value'].split('#', 1)[1] not in valList:
+                            valList.append(v['value'].split('#', 1)[1])
                     else:
                         valueDict[k] = [v['value'].split('#', 1)[1]]
 
