@@ -37,10 +37,15 @@ def dummy():
                 for k, v in result.items():
                     if k in valueDict.keys():
                         valList = valueDict[k]
-                        if v['value'].split('#', 1)[1] not in valList:
+                        if '#' in v['value']:
                             valList.append(v['value'].split('#', 1)[1])
+                        else:
+                            valList.append(v['value'])
                     else:
-                        valueDict[k] = [v['value'].split('#', 1)[1]]
+                        if '#' in v['value']: 
+                            valueDict[k] = [v['value'].split('#', 1)[1]]
+                        else:
+                            valueDict[k] = [v['value']]
 
         # creating new list to hold columnNames and columnValues as dictionaries
         jsonValuesPairs = []
@@ -55,8 +60,6 @@ def dummy():
     except Exception as e:
         print(e)
         return jsonify({'error': 'Error occurred'}), 500
-    
-    
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
