@@ -20,22 +20,4 @@ const MyTableComponent = ({ data }) => {
   );
 };
 
-
-{
-        {
-            columnName:column1,
-          Values : []
-        },
-        {
-        columnName:column4,
-          Values : []
-        },
-        {
-         columnName:column3,
-          Values : []
-        }
-    }
-
-
-
 export default MyTableComponent;
