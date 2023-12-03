@@ -1,0 +1,21 @@
+.site-footer {
+    background-color: #000000;
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.site-footer .footer-content {
+    margin: 0 auto;
+    max-width: 960px;
+}
+
+.site-footer .footer-links {
+    margin-top: 10px;
+}
+
+.site-footer .footer-links a {
+    color: white;
+    text-decoration: none;
+    margin: 0 10px;
+}
