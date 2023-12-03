@@ -42,18 +42,16 @@ def dummy():
                     else:
                         valueDict[k] = [v['value'].split('#', 1)[1]]
 
-        # creating new dictionary to hold columnNames and columnValues
-        jsonDict = {}
-        nameList,valueList = [], []
-        # iterating through value dict
-        for i, j in valueDict.items():
-            nameList.append(i)
-            valueList.append(j)
-            
-        jsonDict['columnName'] = nameList
-        jsonDict['columnValue'] = valueList
+        # creating new list to hold columnNames and columnValues as dictionaries
+        jsonValuesPairs = []
 
-        return jsonify(jsonDict)
+        for i, j in valueDict.items():
+            dict = {}
+            dict["columnName"] = i
+            dict["columnValue"] = j
+            jsonValuesPairs.append(dict)
+
+        return jsonify(jsonValuesPairs)
     except Exception as e:
         print(e)
         return jsonify({'error': 'Error occurred'}), 500
