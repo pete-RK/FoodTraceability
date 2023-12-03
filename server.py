@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import stardog
 from flask_cors import CORS
 
@@ -12,24 +12,67 @@ connection_details = {
     'password': 'Mystardog@2020'
 }
 
-@app.route('/TruckD', methods=['POST'])
-def TruckDetails():
+#storing input value
+req = request.json
+val = req.get('val', '')
+option = req.get('option', '')
+
+
+@app.route('/TruckDetails', methods=['POST'])
+def truckDetails():
     try: 
         val = 'Truck_7'
-        query1 = f"""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        
+        option1 = f"""
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX FoodTraceability: <http://www.semanticweb.org/sairithvikvaikuntam/ontologies/2023/11/FoodTraceability#>
 
-                SELECT ?container (SUM(xsd:float(?loadAmount)) AS ?totalCapacity)
+                SELECT ?eventID ?conatinerID ?startTime ?sourceCotainerLocation ?endTime ?targetContainerLocation ?sourceContainerLoad
+                WHERE {{
+                    ?sourceContainerLoad rdf:type FoodTraceability:SourceLoad.
+                    ?sourceContainerLoad FoodTraceability:hasSourceContainerEventID ?eventID.
+                    ?eventID FoodTraceability:hasStartTime ?startTime.
+                    ?eventID FoodTraceability:hasEndTime ?endTime.
+                    ?eventID FoodTraceability:hasSourceContainerLocation ?sourceCotainerLocation.
+                    ?sourceContainerLoad FoodTraceability:loadedFrom ?conatinerID.
+                    ?conatinerID FoodTraceability:hasContainerID ?id.
+                    FILTER(?id = "{val}")
+                    OPTIONAL{{
+                        ?eventID FoodTraceability:hasTargetContainerLocation ?targetContainerLocation.
+                    }}
+                }}
+                """
+        option2 = f"""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                PREFIX FoodTraceability: <http://www.semanticweb.org/sairithvikvaikuntam/ontologies/2023/11/FoodTraceability#>
+
+                SELECT DISTINCT ?targetContainerID ?sourceContainerID
+                WHERE {{
+                    ?targetContainerLoad rdf:type FoodTraceability:TargetLoad.
+                    ?targetContainerLoad FoodTraceability:loadedTo ?targetContainer.
+                    ?targetContainer FoodTraceability:hasContainerID ?targetContainerID.
+                    ?targetContainerLoad FoodTraceability:hasTargetContainerEventID ?eventID.
+                    ?eventID FoodTraceability:hasSourceLoad ?sourceContainerLoad.
+                    ?sourceContainerLoad FoodTraceability:loadedFrom ?sourceContainer.
+                    ?sourceContainer FoodTraceability:hasContainerID ?sourceContainerID.
+                    FILTER(?targetContainerID = "{val}" && ?sourceContainer != ?targetContainer)
+                    }}
+                """
+        option3 = f"""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                PREFIX FoodTraceability: <http://www.semanticweb.org/sairithvikvaikuntam/ontologies/2023/11/FoodTraceability#>
+
+                SELECT ?sourceContainerLoad (SUM(xsd:float(?loadAmount)) AS ?totalTransported)
                 WHERE {{
                 ?sourceContainerLoad rdf:type FoodTraceability:SourceLoad.
                 ?sourceContainerLoad FoodTraceability:loadedFrom ?container.
                 ?container FoodTraceability:hasContainerID ?containerID.
                 ?sourceContainerLoad FoodTraceability:hasSourceContainerEventID ?sourceEventID.
+                ?sourceEventID FoodTraceability:hasTargetLoad ?targetContainerLoad.
                 ?sourceEventID FoodTraceability:hasMaterialAmount ?loadAmount.
-                FILTER(?containerID = "{val}")
+                FILTER(?containerID = "{val}" && ?targetContainerLoad != ?sourceContainerLoad)
                 }}
-                GROUP BY ?container
+                GROUP BY ?sourceContainerLoad
                 """
+
         # Use a connection context manager
         with stardog.Connection('FoodTraceability', **connection_details) as conn:
             valueDict = {}
