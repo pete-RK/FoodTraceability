@@ -32,15 +32,34 @@ def dummy():
         """
         # Use a connection context manager
         with stardog.Connection('FoodTraceability', **connection_details) as conn:
+            valueDict = {}
             results = conn.select(query1)
             for result in results['results']['bindings']:
                 for k, v in result.items():
-                    res = v['value'].split('#',1)
-                    valList.append(res[1])
-            return jsonify(valList)
+                    if k in valueDict.keys():
+                        valueList = valueDict[k]
+                        if v['value'].split('#', 1)[1] not in valueList:
+                            valueList.append(v['value'].split('#', 1)[1])
+                    else:
+                        valueDict[k] = [v['value'].split('#', 1)[1]]
+
+        # creating new dictionary to hold columnNames and columnValues
+        jsonDict = {}
+        nameList,valueList = [], []
+        # iterating through value dict
+        for i, j in valueDict.items():
+            nameList.append(i)
+            valueList.append(j)
+            
+        jsonDict['columnName'] = nameList
+        jsonDict['columnValue'] = valueList
+
+        return jsonify(jsonDict)
     except Exception as e:
         print(e)
         return jsonify({'error': 'Error occurred'}), 500
+    
+    
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
