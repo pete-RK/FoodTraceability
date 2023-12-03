@@ -12,23 +12,24 @@ connection_details = {
     'password': 'Mystardog@2020'
 }
 
-@app.route('/dummy', methods=['POST'])
-def dummy():
-    try:
-        query1 = """
-        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        PREFIX FoodTraceability: <http://www.semanticweb.org/sairithvikvaikuntam/ontologies/2023/11/FoodTraceability#>
+@app.route('/TruckD', methods=['POST'])
+def TruckDetails():
+    try: 
+        val = 'Truck_7'
+        query1 = f"""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                PREFIX FoodTraceability: <http://www.semanticweb.org/sairithvikvaikuntam/ontologies/2023/11/FoodTraceability#>
 
-        SELECT ?targetContainerLoad
-        WHERE {
-            ?targetContainerLoad rdf:type FoodTraceability:TargetLoad .
-            ?targetContainerLoad FoodTraceability:hasTargetContainerEventID ?event .
-            ?event FoodTraceability:hasSourceLoad ?sourceLoad .
-            ?targetContainerLoad FoodTraceability:hasSourceContainerEventID ?sourceEvent .
-            
-        }
-        LIMIT 20
-        """
+                SELECT ?container (SUM(xsd:float(?loadAmount)) AS ?totalCapacity)
+                WHERE {{
+                ?sourceContainerLoad rdf:type FoodTraceability:SourceLoad.
+                ?sourceContainerLoad FoodTraceability:loadedFrom ?container.
+                ?container FoodTraceability:hasContainerID ?containerID.
+                ?sourceContainerLoad FoodTraceability:hasSourceContainerEventID ?sourceEventID.
+                ?sourceEventID FoodTraceability:hasMaterialAmount ?loadAmount.
+                FILTER(?containerID = "{val}")
+                }}
+                GROUP BY ?container
+                """
         # Use a connection context manager
         with stardog.Connection('FoodTraceability', **connection_details) as conn:
             valueDict = {}

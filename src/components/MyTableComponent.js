@@ -6,11 +6,11 @@ const MyTableComponent = ({ data }) => {
   const columnHeaders = data.map(item => item.columnName);
 
   // Calculate the maximum number of rows
-  const maxRows = Math.max(...data.map(item => item.values.length));
+  const maxRows = Math.max(...data.map(item => item.columnValue.length));
 
   // Create rows data
   const rowsData = Array.from({ length: maxRows }).map((_, rowIndex) => {
-    return data.map(column => column.values[rowIndex] || '');
+    return data.map(column => column.columnValue[rowIndex] || '');
   });
 
   return (
