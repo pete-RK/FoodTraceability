@@ -12,19 +12,20 @@ connection_details = {
     'password': 'Mystardog@2020'
 }
 
-#storing input value
-req = request.json
-val = req.get('val', '')
-option = req.get('option', '')
+
 
 
 @app.route('/TruckDetails', methods=['POST'])
 def truckDetails():
     try: 
-        val = 'Truck_7'
-        
-        option1 = f"""
-                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        #storing input value
+        req = request.json
+        val = req.get('inputValue', '')
+        option = req.get('radioValue', '')
+
+    # Define queries in a dictionary
+        queries = {
+            'option1': f"""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX FoodTraceability: <http://www.semanticweb.org/sairithvikvaikuntam/ontologies/2023/11/FoodTraceability#>
 
                 SELECT ?eventID ?conatinerID ?startTime ?sourceCotainerLocation ?endTime ?targetContainerLocation ?sourceContainerLoad
@@ -41,11 +42,11 @@ def truckDetails():
                         ?eventID FoodTraceability:hasTargetContainerLocation ?targetContainerLocation.
                     }}
                 }}
-                """
-        option2 = f"""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                """,
+        'option2': f"""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX FoodTraceability: <http://www.semanticweb.org/sairithvikvaikuntam/ontologies/2023/11/FoodTraceability#>
 
-                SELECT DISTINCT ?targetContainerID ?sourceContainerID
+                SELECT DISTINCT ?sourceContainerID ?targetContainerID
                 WHERE {{
                     ?targetContainerLoad rdf:type FoodTraceability:TargetLoad.
                     ?targetContainerLoad FoodTraceability:loadedTo ?targetContainer.
@@ -56,8 +57,8 @@ def truckDetails():
                     ?sourceContainer FoodTraceability:hasContainerID ?sourceContainerID.
                     FILTER(?targetContainerID = "{val}" && ?sourceContainer != ?targetContainer)
                     }}
-                """
-        option3 = f"""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                """,
+        'option3' : f"""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX FoodTraceability: <http://www.semanticweb.org/sairithvikvaikuntam/ontologies/2023/11/FoodTraceability#>
 
                 SELECT ?sourceContainerLoad (SUM(xsd:float(?loadAmount)) AS ?totalTransported)
@@ -71,12 +72,14 @@ def truckDetails():
                 FILTER(?containerID = "{val}" && ?targetContainerLoad != ?sourceContainerLoad)
                 }}
                 GROUP BY ?sourceContainerLoad
-                """
+                """}
+           # Select the appropriate query based on radioValue
+        selected_query = queries.get(option)
 
         # Use a connection context manager
-        with stardog.Connection('FoodTraceability', **connection_details) as conn:
+        with stardog.Connection('FoodTraceability_2', **connection_details) as conn:
             valueDict = {}
-            results = conn.select(query1)
+            results = conn.select(selected_query)
             for result in results['results']['bindings']:
                 for k, v in result.items():
                     if k in valueDict.keys():

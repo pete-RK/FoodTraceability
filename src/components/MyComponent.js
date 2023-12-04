@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import MyTableComponent from './MyTableComponent';
+import '../styles/MyComponent.css';
 
 const MyComponent = () => {
     const [inputValue, setInputValue] = useState('');
@@ -9,7 +10,7 @@ const MyComponent = () => {
 
     const fetchData = async () => {
         try {
-            const response = await axios.post('http://127.0.0.1:5000/dummy', {
+            const response = await axios.post('http://127.0.0.1:5000/TruckDetails', {
                 // Include inputValue and radioValue in the request body if needed
                 inputValue,
                 radioValue
@@ -26,12 +27,13 @@ const MyComponent = () => {
     };
 
     return (
-        <div>
+        <div className='Container_details'>
             <div>
                 <input
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="e.g., Truck_1, Combine_1, Cart_1" 
                 />
                 <div>
                     <label>
@@ -41,7 +43,7 @@ const MyComponent = () => {
                             checked={radioValue === 'option1'}
                             onChange={(e) => setRadioValue(e.target.value)}
                         />
-                        Option 1
+                        Container Details
                     </label>
                     <label>
                         <input
@@ -50,7 +52,7 @@ const MyComponent = () => {
                             checked={radioValue === 'option2'}
                             onChange={(e) => setRadioValue(e.target.value)}
                         />
-                        Option 2
+                        Transfor Details
                     </label>
                     <label>
                         <input
@@ -59,7 +61,7 @@ const MyComponent = () => {
                             checked={radioValue === 'option3'}
                             onChange={(e) => setRadioValue(e.target.value)}
                         />
-                        Option 3
+                        Container Load Details
                     </label>
                 </div>
                 <button onClick={handleFetchData}>Fetch Data</button>
